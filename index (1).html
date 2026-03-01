@@ -1,0 +1,800 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <link rel="icon" type="image/png" href="favicon.jpeg" />
+    <link rel="icon" type="image/png" sizes="32x32" href="favicon.jpeg" />
+    <link rel="apple-touch-icon" href="favicon.jpeg" />
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Brady's Site</title>
+    <meta name="title" content="Brady's site" />
+    <meta name="description" content="Brady's private site." />
+    <meta property="og:type" content="website" />
+    <meta property="og:url" content="https://gn-math.github.io/" />
+    <meta property="og:title" content="Brady's site" />
+    <meta property="og:description" content="Play unblocked games on GN-Math. Fast, free, no downloads." />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:url" content="https://gn-math.github.io/" />
+    <meta name="twitter:title" content="Brady's site" />
+    <link rel="stylesheet" href="style.css" />
+    <link rel="manifest" href="manifest.json" />
+    <meta name="theme-color" content="#008080" />
+
+    <style>
+      /* ── PASSCODE PROMPT ─────────────────────────────────────── */
+      #passcodeOverlay {
+        display: none;
+        position: fixed;
+        inset: 0;
+        z-index: 99997;
+        background: rgba(0,0,0,0.82);
+        backdrop-filter: blur(6px);
+        align-items: center;
+        justify-content: center;
+      }
+      #passcodeOverlay.visible { display: flex; }
+
+      .passcode-box {
+        background: var(--surface);
+        border: 1px solid var(--border);
+        border-radius: var(--radius-lg);
+        width: 100%;
+        max-width: 340px;
+        padding: 32px 28px 26px;
+        position: relative;
+        box-shadow: var(--shadow-xl);
+        margin: 20px;
+        box-sizing: border-box;
+      }
+      .passcode-box::before {
+        content: '';
+        position: absolute;
+        top: 0; left: 10%; right: 10%;
+        height: 2px;
+        border-radius: 99px;
+        background: var(--gradient-primary);
+      }
+      .passcode-title {
+        font-size: 0.9rem;
+        font-weight: 800;
+        text-transform: uppercase;
+        letter-spacing: 2px;
+        color: var(--primary);
+        margin-bottom: 6px;
+      }
+      .passcode-desc {
+        font-size: 0.78rem;
+        color: var(--text-muted);
+        margin-bottom: 14px;
+      }
+      .passcode-timer {
+        display: block;
+        font-size: 0.72rem;
+        font-weight: 700;
+        color: var(--primary);
+        letter-spacing: 1px;
+        margin-bottom: 14px;
+        font-variant-numeric: tabular-nums;
+      }
+      .passcode-input {
+        width: 100%;
+        background: var(--bg-secondary);
+        border: 1px solid var(--border);
+        border-radius: var(--radius);
+        padding: 11px 14px;
+        color: var(--text);
+        font-size: 0.95rem;
+        font-weight: 700;
+        letter-spacing: 2px;
+        outline: none;
+        margin-bottom: 6px;
+        box-sizing: border-box;
+        transition: border-color 0.2s, box-shadow 0.2s;
+      }
+      .passcode-input:focus {
+        border-color: var(--primary);
+        box-shadow: 0 0 0 3px var(--primary-light);
+      }
+      .passcode-error {
+        font-size: 0.75rem;
+        color: #e05050;
+        min-height: 18px;
+        margin-bottom: 14px;
+      }
+      .passcode-submit {
+        width: 100%;
+        padding: 11px;
+        background: var(--gradient-primary);
+        border: none;
+        border-radius: var(--radius);
+        color: #fff;
+        font-size: 0.78rem;
+        font-weight: 800;
+        letter-spacing: 2px;
+        text-transform: uppercase;
+        cursor: pointer;
+        box-shadow: var(--shadow-glow);
+        transition: opacity 0.2s, transform 0.2s;
+      }
+      .passcode-submit:hover { opacity: 0.88; transform: translateY(-1px); }
+
+      /* ── ADMIN PANEL ─────────────────────────────────────────── */
+      #adminOverlay {
+        display: none;
+        position: fixed;
+        inset: 0;
+        z-index: 99996;
+        background: rgba(0,0,0,0.72);
+        backdrop-filter: blur(4px);
+        align-items: flex-start;
+        justify-content: center;
+        overflow-y: auto;
+        padding: 40px 20px;
+      }
+      #adminOverlay.visible { display: flex; }
+
+      #adminPanel {
+        background: var(--surface);
+        border: 1px solid var(--border);
+        border-radius: var(--radius-xl);
+        width: 100%;
+        max-width: 540px;
+        margin: auto;
+        flex-shrink: 0;
+        box-shadow: var(--shadow-xl);
+        position: relative;
+      }
+      #adminPanel::before {
+        content: '';
+        position: absolute;
+        top: 0; left: 10%; right: 10%;
+        height: 2px;
+        border-radius: 99px;
+        background: var(--gradient-primary);
+      }
+      .ap-header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 20px 24px 16px;
+        border-bottom: 1px solid var(--border);
+      }
+      .ap-title {
+        font-size: 1rem;
+        font-weight: 800;
+        text-transform: uppercase;
+        letter-spacing: 2px;
+        color: var(--primary);
+      }
+      .ap-close {
+        background: none;
+        border: none;
+        color: var(--text-muted);
+        font-size: 1.5rem;
+        cursor: pointer;
+        line-height: 1;
+        padding: 2px 6px;
+        border-radius: var(--radius-sm);
+        transition: color 0.2s, background 0.2s;
+      }
+      .ap-close:hover { color: var(--text); background: var(--surface-hover); }
+      .ap-body { padding: 18px 24px 28px; }
+      .ap-subtitle {
+        font-size: 0.72rem;
+        color: var(--text-light);
+        letter-spacing: 1px;
+        text-transform: uppercase;
+        margin-bottom: 16px;
+      }
+      .ap-stats {
+        display: flex;
+        gap: 12px;
+        margin-bottom: 20px;
+      }
+      .ap-stat {
+        flex: 1;
+        background: var(--bg-secondary);
+        border: 1px solid var(--border);
+        border-radius: var(--radius);
+        padding: 12px 14px;
+        text-align: center;
+      }
+      .ap-stat-num {
+        font-size: 1.6rem;
+        font-weight: 800;
+        color: var(--primary);
+        line-height: 1;
+        margin-bottom: 4px;
+      }
+      .ap-stat-label {
+        font-size: 0.65rem;
+        color: var(--text-light);
+        text-transform: uppercase;
+        letter-spacing: 1px;
+      }
+      .ap-device-row {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 11px 14px;
+        background: var(--bg-secondary);
+        border: 1px solid var(--border);
+        border-radius: var(--radius);
+        margin-bottom: 8px;
+        gap: 10px;
+      }
+      .ap-device-info { flex: 1; min-width: 0; }
+      .ap-device-id {
+        font-size: 0.72rem;
+        font-family: monospace;
+        color: var(--text-muted);
+        word-break: break-all;
+        margin-bottom: 3px;
+      }
+      .ap-device-meta { font-size: 0.68rem; color: var(--text-light); }
+      .ap-device-badge {
+        font-size: 0.65rem;
+        font-weight: 700;
+        letter-spacing: 1px;
+        text-transform: uppercase;
+        padding: 3px 8px;
+        border-radius: var(--radius-sm);
+        white-space: nowrap;
+        flex-shrink: 0;
+      }
+      .ap-device-badge.allowed { background: rgba(0,160,80,0.12); color: #22c55e; border: 1px solid rgba(0,160,80,0.3); }
+      .ap-device-badge.blocked { background: rgba(220,38,38,0.12); color: #ef4444; border: 1px solid rgba(220,38,38,0.3); }
+      .ap-empty { text-align: center; color: var(--text-light); font-size: 0.85rem; padding: 30px 0; }
+      .ap-refresh {
+        width: 100%;
+        margin-top: 16px;
+        padding: 10px;
+        background: var(--bg-secondary);
+        border: 1px solid var(--border);
+        border-radius: var(--radius);
+        color: var(--text-muted);
+        font-size: 0.75rem;
+        font-weight: 700;
+        letter-spacing: 1.5px;
+        text-transform: uppercase;
+        cursor: pointer;
+        transition: background 0.2s, color 0.2s;
+      }
+      .ap-refresh:hover { background: var(--surface-hover); color: var(--text); }
+
+      /* Ban / unban button */
+      .ap-ban-btn {
+        font-size: 0.62rem;
+        font-weight: 800;
+        letter-spacing: 1px;
+        text-transform: uppercase;
+        padding: 4px 10px;
+        border-radius: var(--radius-sm);
+        border: none;
+        cursor: pointer;
+        white-space: nowrap;
+        flex-shrink: 0;
+        transition: opacity 0.2s, transform 0.15s;
+      }
+      .ap-ban-btn:hover { opacity: 0.82; transform: scale(1.05); }
+      .ap-ban-btn.ban   { background: rgba(220,38,38,0.18); color: #ef4444; border: 1px solid rgba(220,38,38,0.4); }
+      .ap-ban-btn.unban { background: rgba(0,160,80,0.15);  color: #22c55e; border: 1px solid rgba(0,160,80,0.4);  }
+
+      /* Online dot */
+      .ap-online-dot {
+        display: inline-block;
+        width: 7px; height: 7px;
+        border-radius: 50%;
+        background: #22c55e;
+        box-shadow: 0 0 5px #22c55e;
+        margin-right: 5px;
+        animation: pulse-dot 1.5s infinite;
+        flex-shrink: 0;
+      }
+      @keyframes pulse-dot {
+        0%,100% { opacity: 1; }
+        50%      { opacity: 0.4; }
+      }
+
+      /* Live scan counter */
+      #apScanStatus {
+        font-size: 0.65rem;
+        color: var(--text-light);
+        text-align: center;
+        margin-top: 8px;
+        letter-spacing: 0.5px;
+      }
+
+      /* Banned overlay that covers the whole page for banned users */
+      #bannedOverlay {
+        display: none;
+        position: fixed;
+        inset: 0;
+        z-index: 999999;
+        background: #0f172a;
+        align-items: center;
+        justify-content: center;
+        flex-direction: column;
+        gap: 16px;
+        color: #ef4444;
+        font-family: monospace;
+        text-align: center;
+        padding: 20px;
+      }
+      #bannedOverlay.visible { display: flex; }
+      #bannedOverlay h1 { font-size: 2rem; margin: 0; }
+      #bannedOverlay p  { color: #94a3b8; font-size: 0.9rem; max-width: 340px; }
+
+      /* ── INVISIBLE ADMIN TRIGGER ────────────────────────────────── */
+      /* A 16x16 transparent pixel in the very top-left corner.
+         No hover effect. No cursor change. Completely invisible.    */
+      #adminTriggerBtn {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 16px;
+        height: 16px;
+        background: transparent;
+        border: none;
+        cursor: default;
+        opacity: 0;
+        z-index: 9999;
+        padding: 0;
+      }
+    </style>
+  </head>
+
+  <body class="dark-mode">
+
+    <!-- BANNED SCREEN — shown if this device is banned -->
+    <div id="bannedOverlay">
+      <h1>🚫 Access Denied</h1>
+      <p>Your device has been banned from this site. If you believe this is a mistake, contact the site owner.</p>
+    </div>
+
+    <!-- PASSCODE PROMPT -->
+    <div id="passcodeOverlay">
+      <div class="passcode-box">
+        <div class="passcode-title">⚙ Admin Access</div>
+        <div class="passcode-desc">Enter the admin passcode to continue.</div>
+        <div class="passcode-timer" id="passcodeTimer">Closes in 10s</div>
+        <input class="passcode-input" type="password" id="passcodeInput" placeholder="••••••••••••••••" maxlength="40" />
+        <div class="passcode-error" id="passcodeError"></div>
+        <button class="passcode-submit" onclick="submitPasscode()">Enter</button>
+      </div>
+    </div>
+
+    <!-- ADMIN PANEL -->
+    <div id="adminOverlay">
+      <div id="adminPanel">
+        <div class="ap-header">
+          <div class="ap-title">⚙ Admin — Device Log</div>
+          <button class="ap-close" onclick="closeAdminPanel()">×</button>
+        </div>
+        <div class="ap-body">
+          <div class="ap-subtitle">Live device log — scans every 10 seconds</div>
+          <div class="ap-stats">
+            <div class="ap-stat"><div class="ap-stat-num" id="statTotal">—</div><div class="ap-stat-label">Total Visits</div></div>
+            <div class="ap-stat"><div class="ap-stat-num" id="statOnline">—</div><div class="ap-stat-label">Online Now</div></div>
+            <div class="ap-stat"><div class="ap-stat-num" id="statAllowed">—</div><div class="ap-stat-label">Allowed</div></div>
+            <div class="ap-stat"><div class="ap-stat-num" id="statBlocked">—</div><div class="ap-stat-label">Banned</div></div>
+          </div>
+          <div id="apDeviceList"><div class="ap-empty">Loading...</div></div>
+          <div id="apScanStatus">Waiting for first scan…</div>
+          <button class="ap-refresh" onclick="loadAdminPanel()">↻ Refresh Now</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- INVISIBLE ADMIN TRIGGER: 16x16 transparent pixel, top-left corner, double-click only -->
+    <button id="adminTriggerBtn" ondblclick="showPasscodePrompt()" aria-hidden="true" tabindex="-1"></button>
+
+    <!-- MAIN SITE -->
+    <div id="mainSite">
+      <header>
+        <div class="header-content">
+          <div class="logo">Brady's site</div>
+
+          <div class="control-buttons">
+            <button id="refresh" class="control-button" title="Refresh all the zones" onclick="listZones()">
+              <img src="refresh-icon.png" alt="refresh" />
+            </button>
+            <button id="settings" class="control-button" title="Settings!">
+              <img src="setting.png" alt="settings" />
+            </button>
+          </div>
+        </div>
+      </header>
+
+      <main>
+        <details id="allZonesWrapper" open>
+          <summary id="allSummary" style="font-size:1.2rem;font-weight:bold;cursor:pointer">All Games</summary>
+
+          <!-- ══════════════════════════════════════════════════════
+               HARDCODED GAMES — Easy to configure:
+               - Change the href in window.open() to set the game URL
+               - Change the src in <img> to set the image path
+               - Image paths are relative to this HTML file's location
+               ══════════════════════════════════════════════════════ -->
+          <div id="hardcoded-games" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:1.5rem;margin-bottom:1.5rem;">
+
+            <!-- GAME 1: Bite At Freddy's -->
+            <div class="zone-item" onclick="window.open('https://CHANGE-ME-BITE-AT-FREDDYS.com', '_blank')">
+              <img src="images/bite-at-freddys.png" alt="Bite At Freddy's"
+                   onerror="this.style.background='var(--border-light)';this.removeAttribute('src')" />
+              <button>Bite At Freddy's</button>
+            </div>
+
+            <!-- GAME 2: Baldi's Basics -->
+            <div class="zone-item" onclick="window.open('https://CHANGE-ME-BALDIS-BASICS.com', '_blank')">
+              <img src="images/baldis-basics.png" alt="Baldi's Basics"
+                   onerror="this.style.background='var(--border-light)';this.removeAttribute('src')" />
+              <button>Baldi's Basics</button>
+            </div>
+
+            <!-- GAME 3: Bendy and the Ink Machine -->
+            <div class="zone-item" onclick="window.open('https://CHANGE-ME-BENDY-INK-MACHINE.com', '_blank')">
+              <img src="images/bendy-ink-machine.png" alt="Bendy and the Ink Machine"
+                   onerror="this.style.background='var(--border-light)';this.removeAttribute('src')" />
+              <button>Bendy and the Ink Machine</button>
+            </div>
+
+            <!-- GAME 4: Bad Parenting -->
+            <div class="zone-item" onclick="window.open('https://CHANGE-ME-BAD-PARENTING.com', '_blank')">
+              <img src="images/bad-parenting.png" alt="Bad Parenting"
+                   onerror="this.style.background='var(--border-light)';this.removeAttribute('src')" />
+              <button>Bad Parenting</button>
+            </div>
+
+            <!-- GAME 5: Fnaf World -->
+            <div class="zone-item" onclick="window.open('https://CHANGE-ME-FNAF-WORLD.com', '_blank')">
+              <img src="images/fnaf-world.png" alt="Fnaf World"
+                   onerror="this.style.background='var(--border-light)';this.removeAttribute('src')" />
+              <button>Fnaf World</button>
+            </div>
+
+          </div>
+          <!-- ══════════════════════════════════════════════════════ -->
+
+          <div id="container">Loading...</div>
+        </details>
+      </main>
+
+      <div id="zoneViewer">
+        <div class="zone-header">
+          <div class="zone-title">
+            <h2 id="zoneName">Game</h2>
+            <button class="info-button" onclick="showZoneInfo()" title="Zone Information">
+              <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <circle cx="12" cy="12" r="10"></circle>
+                <line x1="12" y1="16" x2="12" y2="12"></line>
+                <line x1="12" y1="8" x2="12.01" y2="8"></line>
+              </svg>
+            </button>
+            <span id="zoneId" style="display:none"></span>
+            <a id="zoneAuthor" href="#" target="_blank">by Author</a>
+          </div>
+          <div class="zone-controls">
+            <button onclick="fullscreenZone()">Fullscreen</button>
+            <button onclick="aboutBlank()">Open in New Tab</button>
+            <button onclick="downloadZone()">Download</button>
+            <button onclick="closeZone()">Close</button>
+          </div>
+        </div>
+        <iframe id="zoneFrame"></iframe>
+      </div>
+
+      <div id="popupOverlay">
+        <div class="popup">
+          <div class="popup-header">
+            <h3 id="popupTitle">Title</h3>
+            <button id="popupClose" onclick="closePopup()">×</button>
+          </div>
+          <div id="popupBody">Content will be here</div>
+        </div>
+      </div>
+
+      <footer>
+        <div class="footer-links">
+          <a href="#" onclick="loadDMCA(); return false">DMCA</a>
+          <a href="#" onclick="showContact(); return false">Contact</a>
+          <a href="#" onclick="loadPrivacy(); return false">Privacy Policy</a>
+          <a href="javascript:saveData()">Export Data</a>
+          <a href="#" onclick="document.getElementById('importData').click(); return false">Import Data</a>
+          <input type="file" id="importData" style="display:none" onchange="loadData(event)" />
+        </div>
+      </footer>
+    </div>
+
+    <!-- FIREBASE — Modular SDK v10 -->
+    <script type="module">
+      import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+      import { getFirestore, collection, doc, setDoc, getDoc, getDocs, updateDoc, query, where }
+                               from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+
+      // ── Config ────────────────────────────────────────────────────
+      const firebaseConfig = {
+        apiKey:            "AIzaSyBSRB_H3x9EcJGCBTI5JRkZSfJiUDW6O9E",
+        authDomain:        "finnyprivatesite.firebaseapp.com",
+        projectId:         "finnyprivatesite",
+        storageBucket:     "finnyprivatesite.firebasestorage.app",
+        messagingSenderId: "575839701505",
+        appId:             "1:575839701505:web:5946712828b951c4fc8e00"
+      };
+      const app = initializeApp(firebaseConfig);
+      const db  = getFirestore(app);
+
+      const HEARTBEAT_INTERVAL = 10000; // 10 seconds
+      const ONLINE_THRESHOLD   = 20000; // online if seen within 20s
+
+      // ── Browser fingerprint (used to re-link device if localStorage cleared) ──
+      // Combines stable browser properties into a hash stored as the Firestore doc ID.
+      // The human-readable DEV-XXXX label is stored inside the document.
+      async function getBrowserFingerprint() {
+        const raw = [
+          navigator.userAgent,
+          navigator.language,
+          screen.width + "x" + screen.height,
+          screen.colorDepth,
+          Intl.DateTimeFormat().resolvedOptions().timeZone,
+          navigator.hardwareConcurrency || "",
+          navigator.platform || ""
+        ].join("|");
+        // SHA-256 hash → hex string (used as stable Firestore doc key)
+        const buf  = await crypto.subtle.digest("SHA-256", new TextEncoder().encode(raw));
+        return Array.from(new Uint8Array(buf)).map(b => b.toString(16).padStart(2,"0")).join("");
+      }
+
+      // ── Generate a short readable DEV-XXXX label ──────────────────
+      function makeDevLabel() {
+        const chars = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789"; // no I/O/0/1 to avoid confusion
+        let label = "DEV-";
+        for (let i = 0; i < 4; i++) label += chars[Math.floor(Math.random() * chars.length)];
+        return label;
+      }
+
+      // ── Resolve this device's identity from Firestore ─────────────
+      // Returns { fingerprint, devLabel } — creates the Firestore record if new.
+      let _identity = null;
+      async function resolveIdentity() {
+        if (_identity) return _identity;
+
+        const fingerprint = await getBrowserFingerprint();
+        const ref         = doc(db, "visitor_log", fingerprint);
+        const snap        = await getDoc(ref);
+
+        let devLabel;
+        if (snap.exists()) {
+          // Known device — reuse whatever label was assigned before
+          devLabel = snap.data().devLabel || "DEV-????";
+        } else {
+          // Brand-new device — assign a fresh DEV-XXXX label
+          devLabel = makeDevLabel();
+          await setDoc(ref, {
+            fingerprint,
+            devLabel,
+            firstSeen: new Date().toISOString(),
+            lastSeen:  new Date().toISOString(),
+            userAgent: navigator.userAgent,
+            allowed:   true
+          });
+        }
+
+        _identity = { fingerprint, devLabel };
+        return _identity;
+      }
+
+      // ── Heartbeat ─────────────────────────────────────────────────
+      let heartbeatTimer;
+      async function heartbeat() {
+        try {
+          const { fingerprint, devLabel } = await resolveIdentity();
+          const ref = doc(db, "visitor_log", fingerprint);
+
+          // Update lastSeen (and keep all other fields via merge)
+          await setDoc(ref, {
+            lastSeen:  new Date().toISOString(),
+            userAgent: navigator.userAgent,
+            devLabel,
+            fingerprint
+          }, { merge: true });
+
+          // Check ban status
+          const snap = await getDoc(ref);
+          if (snap.exists() && snap.data().allowed === false) {
+            document.getElementById("bannedOverlay").classList.add("visible");
+            document.getElementById("mainSite").style.display = "none";
+            clearInterval(heartbeatTimer);
+          }
+        } catch(e) {
+          console.warn("Heartbeat failed:", e);
+        }
+      }
+
+      heartbeat();
+      heartbeatTimer = setInterval(heartbeat, HEARTBEAT_INTERVAL);
+
+      // ── Admin: ban / unban ────────────────────────────────────────
+      window._banDevice = async function(fingerprint, ban) {
+        try {
+          await updateDoc(doc(db, "visitor_log", fingerprint), { allowed: !ban });
+          window._loadAdminPanelData();
+        } catch(e) {
+          alert("Failed to update: " + e.message);
+        }
+      };
+
+      // ── Admin panel loader ────────────────────────────────────────
+      window._loadAdminPanelData = async function() {
+        document.getElementById("apDeviceList").innerHTML = '<div class="ap-empty">Loading…</div>';
+        ["statTotal","statOnline","statAllowed","statBlocked"].forEach(id => {
+          document.getElementById(id).textContent = "—";
+        });
+
+        try {
+          const snap    = await getDocs(collection(db, "visitor_log"));
+          const now     = Date.now();
+          const entries = [];
+          snap.forEach(d => entries.push(d.data()));
+
+          // Sort: online first → then by lastSeen desc
+          entries.sort((a, b) => {
+            const aOn = (now - new Date(a.lastSeen||0).getTime()) < ONLINE_THRESHOLD;
+            const bOn = (now - new Date(b.lastSeen||0).getTime()) < ONLINE_THRESHOLD;
+            if (aOn !== bOn) return bOn ? 1 : -1;
+            return (b.lastSeen||"").localeCompare(a.lastSeen||"");
+          });
+
+          const total   = entries.length;
+          const online  = entries.filter(e => (now - new Date(e.lastSeen||0).getTime()) < ONLINE_THRESHOLD).length;
+          const allowed = entries.filter(e => e.allowed !== false).length;
+          const banned  = total - allowed;
+
+          document.getElementById("statTotal").textContent   = total;
+          document.getElementById("statOnline").textContent  = online;
+          document.getElementById("statAllowed").textContent = allowed;
+          document.getElementById("statBlocked").textContent = banned;
+
+          const scanEl = document.getElementById("apScanStatus");
+          if (scanEl) scanEl.textContent = "Last scan: " + new Date().toLocaleTimeString() + " · auto-refreshes every 10s";
+
+          if (total === 0) {
+            document.getElementById("apDeviceList").innerHTML = '<div class="ap-empty">No devices logged yet.</div>';
+            return;
+          }
+
+          document.getElementById("apDeviceList").innerHTML = entries.map(e => {
+            const fp       = e.fingerprint || "unknown";
+            const label    = e.devLabel    || "DEV-????";
+            const date     = e.lastSeen    ? new Date(e.lastSeen).toLocaleString()  : "unknown";
+            const first    = e.firstSeen   ? new Date(e.firstSeen).toLocaleString() : "unknown";
+            const isOnline = (now - new Date(e.lastSeen||0).getTime()) < ONLINE_THRESHOLD;
+            const isBanned = e.allowed === false;
+
+            const dot    = isOnline ? '<span class="ap-online-dot"></span>' : '';
+            const badge  = isBanned
+              ? '<span class="ap-device-badge blocked">✕ Banned</span>'
+              : '<span class="ap-device-badge allowed">✓ Allowed</span>';
+            const banBtn = isBanned
+              ? `<button class="ap-ban-btn unban" onclick="window._banDevice('${fp}',false)">Unban</button>`
+              : `<button class="ap-ban-btn ban"   onclick="window._banDevice('${fp}',true)">Ban</button>`;
+
+            return `<div class="ap-device-row">
+              <div class="ap-device-info">
+                <div class="ap-device-id">${dot}<strong style="font-size:0.9rem;letter-spacing:1px;color:var(--primary)">${label}</strong></div>
+                <div class="ap-device-meta">First seen: ${first}</div>
+                <div class="ap-device-meta">Last seen: ${date}</div>
+              </div>
+              <div style="display:flex;flex-direction:column;align-items:flex-end;gap:5px;flex-shrink:0">
+                ${badge}
+                ${banBtn}
+              </div>
+            </div>`;
+          }).join("");
+
+        } catch(err) {
+          console.error(err);
+          document.getElementById("apDeviceList").innerHTML =
+            '<div class="ap-empty" style="color:#ef4444">Could not load. Check Firestore rules.</div>';
+        }
+      };
+
+      // Auto-refresh panel while open
+      setInterval(() => {
+        if (document.getElementById("adminOverlay").classList.contains("visible")) {
+          window._loadAdminPanelData();
+        }
+      }, HEARTBEAT_INTERVAL);
+
+    </script>
+
+    <script>
+      var ADMIN_CODE = "Generalpug1814!";
+
+      // ── PASSCODE PROMPT ───────────────────────────────────────────
+      var passcodeCountdown = null;
+
+      function showPasscodePrompt() {
+        document.getElementById("passcodeInput").value = "";
+        document.getElementById("passcodeError").textContent = "";
+        document.getElementById("passcodeTimer").textContent = "Closes in 10s";
+        document.getElementById("passcodeOverlay").classList.add("visible");
+        setTimeout(function(){ document.getElementById("passcodeInput").focus(); }, 60);
+        var remaining = 10;
+        clearInterval(passcodeCountdown);
+        passcodeCountdown = setInterval(function() {
+          remaining--;
+          document.getElementById("passcodeTimer").textContent = "Closes in " + remaining + "s";
+          if (remaining <= 0) { clearInterval(passcodeCountdown); closePasscodePrompt(); }
+        }, 1000);
+      }
+
+      function closePasscodePrompt() {
+        clearInterval(passcodeCountdown);
+        document.getElementById("passcodeOverlay").classList.remove("visible");
+        document.getElementById("passcodeInput").value = "";
+        document.getElementById("passcodeError").textContent = "";
+      }
+
+      function submitPasscode() {
+        var val = document.getElementById("passcodeInput").value;
+        if (val === ADMIN_CODE) {
+          closePasscodePrompt();
+          openAdminPanel();
+        } else {
+          document.getElementById("passcodeError").textContent = "Wrong passcode.";
+          document.getElementById("passcodeInput").value = "";
+          document.getElementById("passcodeInput").focus();
+        }
+      }
+
+      document.addEventListener("DOMContentLoaded", function() {
+        document.getElementById("passcodeInput").addEventListener("keydown", function(e) {
+          if (e.key === "Enter") submitPasscode();
+        });
+      });
+
+      // ── ADMIN PANEL ───────────────────────────────────────────────
+      function openAdminPanel() {
+        document.getElementById("adminOverlay").classList.add("visible");
+        loadAdminPanel();
+      }
+
+      function closeAdminPanel() {
+        document.getElementById("adminOverlay").classList.remove("visible");
+      }
+
+      function loadAdminPanel() {
+        // Delegates to the module function exposed on window
+        if (typeof window._loadAdminPanelData === "function") {
+          window._loadAdminPanelData();
+        } else {
+          // Module not ready yet — retry shortly
+          setTimeout(loadAdminPanel, 200);
+        }
+      }
+    </script>
+
+    <script src="script.js"></script>
+
+    <script>
+      try {
+        var search = new URLSearchParams(window.location.search);
+        if (search.get('privacy')) loadPrivacy();
+      } catch(e) {}
+    </script>
+
+    <script>
+      try { navigator.serviceWorker.register(location.protocol + '//' + location.hostname + '/sw.js'); } catch(e) {}
+    </script>
+
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-WX5VS54ZDW"></script>
+    <script>
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){ dataLayer.push(arguments); }
+      gtag('js', new Date());
+      gtag('config', 'G-WX5VS54ZDW');
+    </script>
+
+  </body>
+</html>
