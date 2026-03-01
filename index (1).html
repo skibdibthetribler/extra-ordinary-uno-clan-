@@ -1,0 +1,537 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <link rel="icon" type="image/png" href="favicon.jpeg" />
+    <link rel="icon" type="image/png" sizes="32x32" href="favicon.jpeg" />
+    <link rel="apple-touch-icon" href="favicon.jpeg" />
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Finny's Private Site</title>
+    <meta name="title" content="Finny's private site" />
+    <meta name="description" content="Its Finnegans private site not made by me." />
+    <meta property="og:type" content="website" />
+    <meta property="og:url" content="https://gn-math.github.io/" />
+    <meta property="og:title" content="Finny's private site" />
+    <meta property="og:description" content="Play unblocked games on GN-Math. Fast, free, no downloads." />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:url" content="https://gn-math.github.io/" />
+    <meta name="twitter:title" content="Finny's private site" />
+    <link rel="stylesheet" href="style.css" />
+    <link rel="manifest" href="manifest.json" />
+    <meta name="theme-color" content="#008080" />
+
+    <style>
+      /* ── PASSCODE PROMPT ─────────────────────────────────────── */
+      #passcodeOverlay {
+        display: none;
+        position: fixed;
+        inset: 0;
+        z-index: 99997;
+        background: rgba(0,0,0,0.82);
+        backdrop-filter: blur(6px);
+        align-items: center;
+        justify-content: center;
+      }
+      #passcodeOverlay.visible { display: flex; }
+
+      .passcode-box {
+        background: var(--surface);
+        border: 1px solid var(--border);
+        border-radius: var(--radius-lg);
+        width: 100%;
+        max-width: 340px;
+        padding: 32px 28px 26px;
+        position: relative;
+        box-shadow: var(--shadow-xl);
+        margin: 20px;
+        box-sizing: border-box;
+      }
+      .passcode-box::before {
+        content: '';
+        position: absolute;
+        top: 0; left: 10%; right: 10%;
+        height: 2px;
+        border-radius: 99px;
+        background: var(--gradient-primary);
+      }
+      .passcode-title {
+        font-size: 0.9rem;
+        font-weight: 800;
+        text-transform: uppercase;
+        letter-spacing: 2px;
+        color: var(--primary);
+        margin-bottom: 6px;
+      }
+      .passcode-desc {
+        font-size: 0.78rem;
+        color: var(--text-muted);
+        margin-bottom: 14px;
+      }
+      .passcode-timer {
+        display: block;
+        font-size: 0.72rem;
+        font-weight: 700;
+        color: var(--primary);
+        letter-spacing: 1px;
+        margin-bottom: 14px;
+        font-variant-numeric: tabular-nums;
+      }
+      .passcode-input {
+        width: 100%;
+        background: var(--bg-secondary);
+        border: 1px solid var(--border);
+        border-radius: var(--radius);
+        padding: 11px 14px;
+        color: var(--text);
+        font-size: 0.95rem;
+        font-weight: 700;
+        letter-spacing: 2px;
+        outline: none;
+        margin-bottom: 6px;
+        box-sizing: border-box;
+        transition: border-color 0.2s, box-shadow 0.2s;
+      }
+      .passcode-input:focus {
+        border-color: var(--primary);
+        box-shadow: 0 0 0 3px var(--primary-light);
+      }
+      .passcode-error {
+        font-size: 0.75rem;
+        color: #e05050;
+        min-height: 18px;
+        margin-bottom: 14px;
+      }
+      .passcode-submit {
+        width: 100%;
+        padding: 11px;
+        background: var(--gradient-primary);
+        border: none;
+        border-radius: var(--radius);
+        color: #fff;
+        font-size: 0.78rem;
+        font-weight: 800;
+        letter-spacing: 2px;
+        text-transform: uppercase;
+        cursor: pointer;
+        box-shadow: var(--shadow-glow);
+        transition: opacity 0.2s, transform 0.2s;
+      }
+      .passcode-submit:hover { opacity: 0.88; transform: translateY(-1px); }
+
+      /* ── ADMIN PANEL ─────────────────────────────────────────── */
+      #adminOverlay {
+        display: none;
+        position: fixed;
+        inset: 0;
+        z-index: 99996;
+        background: rgba(0,0,0,0.72);
+        backdrop-filter: blur(4px);
+        align-items: flex-start;
+        justify-content: center;
+        overflow-y: auto;
+        padding: 40px 20px;
+      }
+      #adminOverlay.visible { display: flex; }
+
+      #adminPanel {
+        background: var(--surface);
+        border: 1px solid var(--border);
+        border-radius: var(--radius-xl);
+        width: 100%;
+        max-width: 540px;
+        margin: auto;
+        flex-shrink: 0;
+        box-shadow: var(--shadow-xl);
+        position: relative;
+      }
+      #adminPanel::before {
+        content: '';
+        position: absolute;
+        top: 0; left: 10%; right: 10%;
+        height: 2px;
+        border-radius: 99px;
+        background: var(--gradient-primary);
+      }
+      .ap-header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 20px 24px 16px;
+        border-bottom: 1px solid var(--border);
+      }
+      .ap-title {
+        font-size: 1rem;
+        font-weight: 800;
+        text-transform: uppercase;
+        letter-spacing: 2px;
+        color: var(--primary);
+      }
+      .ap-close {
+        background: none;
+        border: none;
+        color: var(--text-muted);
+        font-size: 1.5rem;
+        cursor: pointer;
+        line-height: 1;
+        padding: 2px 6px;
+        border-radius: var(--radius-sm);
+        transition: color 0.2s, background 0.2s;
+      }
+      .ap-close:hover { color: var(--text); background: var(--surface-hover); }
+      .ap-body { padding: 18px 24px 28px; }
+      .ap-subtitle {
+        font-size: 0.72rem;
+        color: var(--text-light);
+        letter-spacing: 1px;
+        text-transform: uppercase;
+        margin-bottom: 16px;
+      }
+      .ap-stats {
+        display: flex;
+        gap: 12px;
+        margin-bottom: 20px;
+      }
+      .ap-stat {
+        flex: 1;
+        background: var(--bg-secondary);
+        border: 1px solid var(--border);
+        border-radius: var(--radius);
+        padding: 12px 14px;
+        text-align: center;
+      }
+      .ap-stat-num {
+        font-size: 1.6rem;
+        font-weight: 800;
+        color: var(--primary);
+        line-height: 1;
+        margin-bottom: 4px;
+      }
+      .ap-stat-label {
+        font-size: 0.65rem;
+        color: var(--text-light);
+        text-transform: uppercase;
+        letter-spacing: 1px;
+      }
+      .ap-device-row {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 11px 14px;
+        background: var(--bg-secondary);
+        border: 1px solid var(--border);
+        border-radius: var(--radius);
+        margin-bottom: 8px;
+        gap: 10px;
+      }
+      .ap-device-info { flex: 1; min-width: 0; }
+      .ap-device-id {
+        font-size: 0.72rem;
+        font-family: monospace;
+        color: var(--text-muted);
+        word-break: break-all;
+        margin-bottom: 3px;
+      }
+      .ap-device-meta { font-size: 0.68rem; color: var(--text-light); }
+      .ap-device-badge {
+        font-size: 0.65rem;
+        font-weight: 700;
+        letter-spacing: 1px;
+        text-transform: uppercase;
+        padding: 3px 8px;
+        border-radius: var(--radius-sm);
+        white-space: nowrap;
+        flex-shrink: 0;
+      }
+      .ap-device-badge.allowed { background: rgba(0,160,80,0.12); color: #22c55e; border: 1px solid rgba(0,160,80,0.3); }
+      .ap-device-badge.blocked { background: rgba(220,38,38,0.12); color: #ef4444; border: 1px solid rgba(220,38,38,0.3); }
+      .ap-empty { text-align: center; color: var(--text-light); font-size: 0.85rem; padding: 30px 0; }
+      .ap-refresh {
+        width: 100%;
+        margin-top: 16px;
+        padding: 10px;
+        background: var(--bg-secondary);
+        border: 1px solid var(--border);
+        border-radius: var(--radius);
+        color: var(--text-muted);
+        font-size: 0.75rem;
+        font-weight: 700;
+        letter-spacing: 1.5px;
+        text-transform: uppercase;
+        cursor: pointer;
+        transition: background 0.2s, color 0.2s;
+      }
+      .ap-refresh:hover { background: var(--surface-hover); color: var(--text); }
+
+      /* ── HIDDEN ADMIN TRIGGER ────────────────────────────────── */
+      #adminTriggerBtn {
+        position: fixed;
+        bottom: 14px;
+        right: 14px;
+        background: none;
+        border: none;
+        cursor: pointer;
+        opacity: 0.07;
+        font-size: 1.1rem;
+        color: var(--text);
+        padding: 6px 10px;
+        transition: opacity 0.2s;
+        z-index: 9999;
+      }
+      #adminTriggerBtn:hover { opacity: 0.3; }
+    </style>
+  </head>
+
+  <body class="dark-mode">
+
+    <!-- PASSCODE PROMPT -->
+    <div id="passcodeOverlay">
+      <div class="passcode-box">
+        <div class="passcode-title">⚙ Admin Access</div>
+        <div class="passcode-desc">Enter the admin passcode to continue.</div>
+        <div class="passcode-timer" id="passcodeTimer">Closes in 10s</div>
+        <input class="passcode-input" type="password" id="passcodeInput" placeholder="••••••••••••••••" maxlength="40" />
+        <div class="passcode-error" id="passcodeError"></div>
+        <button class="passcode-submit" onclick="submitPasscode()">Enter</button>
+      </div>
+    </div>
+
+    <!-- ADMIN PANEL -->
+    <div id="adminOverlay">
+      <div id="adminPanel">
+        <div class="ap-header">
+          <div class="ap-title">⚙ Admin — Device Log</div>
+          <button class="ap-close" onclick="closeAdminPanel()">×</button>
+        </div>
+        <div class="ap-body">
+          <div class="ap-subtitle">Every device that has visited and attempted login</div>
+          <div class="ap-stats">
+            <div class="ap-stat"><div class="ap-stat-num" id="statTotal">—</div><div class="ap-stat-label">Total Visits</div></div>
+            <div class="ap-stat"><div class="ap-stat-num" id="statAllowed">—</div><div class="ap-stat-label">Allowed</div></div>
+            <div class="ap-stat"><div class="ap-stat-num" id="statBlocked">—</div><div class="ap-stat-label">Blocked</div></div>
+          </div>
+          <div id="apDeviceList"><div class="ap-empty">Loading...</div></div>
+          <button class="ap-refresh" onclick="loadAdminPanel()">↻ Refresh</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- HIDDEN ADMIN TRIGGER -->
+    <button id="adminTriggerBtn" onclick="showPasscodePrompt()" title="Admin">⚙</button>
+
+    <!-- MAIN SITE -->
+    <div id="mainSite">
+      <header>
+        <div class="header-content">
+          <div class="logo">Finny's private site</div>
+          <div class="search-container">
+            <input type="text" id="searchBar" placeholder="Search zones..." oninput="filterZones()" />
+            <select id="sortOptions" onchange="sortZones()">
+              <option value="name">Name</option>
+              <option value="id">ID (Date)</option>
+              <option value="popular">Popular</option>
+              <option value="trendingDay">Trending (Day)</option>
+              <option value="trendingWeek">Trending (Week)</option>
+              <option value="trendingMonth">Trending (Month)</option>
+            </select>
+            <select id="filterOptions" onchange="filterZones2()">
+              <option value="none">(SELECT TAG)</option>
+            </select>
+          </div>
+          <div class="control-buttons">
+            <button id="refresh" class="control-button" title="Refresh all the zones" onclick="listZones()">
+              <img src="refresh-icon.png" alt="refresh" />
+            </button>
+            <button id="settings" class="control-button" title="Settings!">
+              <img src="setting.png" alt="settings" />
+            </button>
+          </div>
+        </div>
+      </header>
+
+      <main>
+        <div id="container">Loading...</div>
+      </main>
+
+      <div id="zoneViewer">
+        <div class="zone-header">
+          <div class="zone-title">
+            <h2 id="zoneName">Game</h2>
+            <button class="info-button" onclick="showZoneInfo()" title="Zone Information">
+              <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <circle cx="12" cy="12" r="10"></circle>
+                <line x1="12" y1="16" x2="12" y2="12"></line>
+                <line x1="12" y1="8" x2="12.01" y2="8"></line>
+              </svg>
+            </button>
+            <span id="zoneId" style="display:none"></span>
+            <a id="zoneAuthor" href="#" target="_blank">by Author</a>
+          </div>
+          <div class="zone-controls">
+            <button onclick="fullscreenZone()">Fullscreen</button>
+            <button onclick="aboutBlank()">Open in New Tab</button>
+            <button onclick="downloadZone()">Download</button>
+            <button onclick="closeZone()">Close</button>
+          </div>
+        </div>
+        <iframe id="zoneFrame"></iframe>
+      </div>
+
+      <div id="popupOverlay">
+        <div class="popup">
+          <div class="popup-header">
+            <h3 id="popupTitle">Title</h3>
+            <button id="popupClose" onclick="closePopup()">×</button>
+          </div>
+          <div id="popupBody">Content will be here</div>
+        </div>
+      </div>
+
+      <footer>
+        <div class="footer-links">
+          <a href="#" onclick="loadDMCA(); return false">DMCA</a>
+          <a href="#" onclick="showContact(); return false">Contact</a>
+          <a href="#" onclick="loadPrivacy(); return false">Privacy Policy</a>
+          <a href="javascript:saveData()">Export Data</a>
+          <a href="#" onclick="document.getElementById('importData').click(); return false">Import Data</a>
+          <input type="file" id="importData" style="display:none" onchange="loadData(event)" />
+        </div>
+      </footer>
+    </div>
+
+    <!-- FIREBASE compat SDK (for admin device log only) -->
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
+
+    <script>
+      firebase.initializeApp({
+        apiKey:            "AIzaSyBSRB_H3x9EcJGCBTI5JRkZSfJiUDW6O9E",
+        authDomain:        "finnyprivatesite.firebaseapp.com",
+        projectId:         "finnyprivatesite",
+        storageBucket:     "finnyprivatesite.firebasestorage.app",
+        messagingSenderId: "575839701505",
+        appId:             "1:575839701505:web:5946712828b951c4fc8e00"
+      });
+      var db = firebase.firestore();
+
+      var ADMIN_CODE = "Generalpug1814!";
+
+      // ── PASSCODE PROMPT ───────────────────────────────────────────
+      var passcodeCountdown = null;
+
+      function showPasscodePrompt() {
+        document.getElementById("passcodeInput").value = "";
+        document.getElementById("passcodeError").textContent = "";
+        document.getElementById("passcodeTimer").textContent = "Closes in 10s";
+        document.getElementById("passcodeOverlay").classList.add("visible");
+        setTimeout(function(){ document.getElementById("passcodeInput").focus(); }, 60);
+        var remaining = 10;
+        clearInterval(passcodeCountdown);
+        passcodeCountdown = setInterval(function() {
+          remaining--;
+          document.getElementById("passcodeTimer").textContent = "Closes in " + remaining + "s";
+          if (remaining <= 0) { clearInterval(passcodeCountdown); closePasscodePrompt(); }
+        }, 1000);
+      }
+
+      function closePasscodePrompt() {
+        clearInterval(passcodeCountdown);
+        document.getElementById("passcodeOverlay").classList.remove("visible");
+        document.getElementById("passcodeInput").value = "";
+        document.getElementById("passcodeError").textContent = "";
+      }
+
+      function submitPasscode() {
+        var val = document.getElementById("passcodeInput").value;
+        if (val === ADMIN_CODE) {
+          closePasscodePrompt();
+          openAdminPanel();
+        } else {
+          document.getElementById("passcodeError").textContent = "Wrong passcode.";
+          document.getElementById("passcodeInput").value = "";
+          document.getElementById("passcodeInput").focus();
+        }
+      }
+
+      document.addEventListener("DOMContentLoaded", function() {
+        document.getElementById("passcodeInput").addEventListener("keydown", function(e) {
+          if (e.key === "Enter") submitPasscode();
+        });
+      });
+
+      // ── ADMIN PANEL ───────────────────────────────────────────────
+      function openAdminPanel() {
+        document.getElementById("adminOverlay").classList.add("visible");
+        loadAdminPanel();
+      }
+
+      function closeAdminPanel() {
+        document.getElementById("adminOverlay").classList.remove("visible");
+      }
+
+      function loadAdminPanel() {
+        document.getElementById("apDeviceList").innerHTML = '<div class="ap-empty">Loading...</div>';
+        document.getElementById("statTotal").textContent   = "—";
+        document.getElementById("statAllowed").textContent = "—";
+        document.getElementById("statBlocked").textContent = "—";
+
+        db.collection("visitor_log").get()
+          .then(function(snap) {
+            var entries = [];
+            snap.forEach(function(d){ entries.push(d.data()); });
+            entries.sort(function(a,b){ return (b.lastSeen||"").localeCompare(a.lastSeen||""); });
+
+            var total   = entries.length;
+            var allowed = entries.filter(function(e){ return e.allowed; }).length;
+            document.getElementById("statTotal").textContent   = total;
+            document.getElementById("statAllowed").textContent = allowed;
+            document.getElementById("statBlocked").textContent = total - allowed;
+
+            if (total === 0) {
+              document.getElementById("apDeviceList").innerHTML = '<div class="ap-empty">No visits logged yet.</div>';
+              return;
+            }
+            document.getElementById("apDeviceList").innerHTML = entries.map(function(e) {
+              var t       = e.token || "unknown";
+              var shortId = t.length > 16 ? (t.substring(0,8) + "…" + t.substring(t.length-8)) : t;
+              var date    = e.lastSeen ? new Date(e.lastSeen).toLocaleString() : "unknown";
+              var badge   = e.allowed
+                ? '<span class="ap-device-badge allowed">✓ Allowed</span>'
+                : '<span class="ap-device-badge blocked">✕ Blocked</span>';
+              return '<div class="ap-device-row">' +
+                '<div class="ap-device-info">' +
+                  '<div class="ap-device-id" title="' + t + '">' + shortId + '</div>' +
+                  '<div class="ap-device-meta">Last seen: ' + date + '</div>' +
+                '</div>' + badge + '</div>';
+            }).join("");
+          })
+          .catch(function(err) {
+            console.error(err);
+            document.getElementById("apDeviceList").innerHTML =
+              '<div class="ap-empty" style="color:#ef4444">Could not load data. Check Firestore rules.</div>';
+          });
+      }
+    </script>
+
+    <script src="script.js"></script>
+
+    <script>
+      try {
+        var search = new URLSearchParams(window.location.search);
+        if (search.get('privacy')) loadPrivacy();
+      } catch(e) {}
+    </script>
+
+    <script>
+      try { navigator.serviceWorker.register(location.protocol + '//' + location.hostname + '/sw.js'); } catch(e) {}
+    </script>
+
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-WX5VS54ZDW"></script>
+    <script>
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){ dataLayer.push(arguments); }
+      gtag('js', new Date());
+      gtag('config', 'G-WX5VS54ZDW');
+    </script>
+
+  </body>
+</html>
